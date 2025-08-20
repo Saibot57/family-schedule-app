@@ -401,29 +401,6 @@
   background-color: #b91c1c;
 }
 
-/* Responsiv design */
-@media (max-width: 640px) {
-  .modal-content {
-    max-height: 100vh;
-    border-radius: 0;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .modal-footer {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .footer-left,
-  .footer-right {
-    width: 100%;
-    justify-content: center;
-    
-    /* --- CSS för nya funktioner i ActivityModal --- */
-
 /* Deltagar-piller och sökfält */
 .participant-pills {
   display: flex;
@@ -482,7 +459,7 @@
 
 .participant-search-input {
   width: 100%;
-  padding-left: 2.5rem !important; /* Åsidosätt tidigare stil */
+  padding-left: 2.5rem !important;
 }
 
 .participant-dropdown {
@@ -513,7 +490,6 @@
   background-color: #f3f4f6;
 }
 
-
 /* Hopfällbar aktivitetstyp */
 .expandable-header {
   display: flex;
@@ -527,8 +503,8 @@
 }
 
 .expandable-header label {
-  margin-bottom: 0; /* Ta bort marginal från label inuti knappen */
-  pointer-events: none; /* Låt klick gå till knappen */
+  margin-bottom: 0;
+  pointer-events: none;
 }
 
 .chevron-icon {
@@ -544,17 +520,6 @@
   animation: fadeIn 0.3s ease;
   margin-top: 0.75rem;
 }
-
-/* Anpassning för datumväljare i återkommande sektion */
-.recurring-options {
-  align-items: center;
-}
-
-.recurring-options .weeks-input { /* Återanvänder klassen men stylar för datum */
-  width: auto;
-  flex-grow: 1;
-}
-/* --- CSS för nya funktioner i ActivityModal (flera dagar, anpassat namn) --- */
 
 /* Dagväljare */
 .day-selector {
@@ -572,6 +537,7 @@
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
 }
 
 .day-btn:hover {
@@ -580,9 +546,9 @@
 }
 
 .day-btn.selected {
-  background-color: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
 }
 
 /* Anpassad aktivitet input */
@@ -614,7 +580,6 @@
 }
 
 .icon-picker-dropdown {
-  display: none;
   position: absolute;
   bottom: 100%;
   left: 0;
@@ -637,19 +602,48 @@
 .icon-picker-wrapper:hover .icon-picker-dropdown {
   opacity: 1;
   visibility: visible;
-  display: grid; /* Behövs för att hover ska fungera */
 }
 
 .icon-picker-dropdown button {
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    padding: 0.25rem;
-    border-radius: 4px;
-    cursor: pointer;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
+
 .icon-picker-dropdown button:hover {
-    background-color: #f3f4f6;
+  background-color: #f3f4f6;
 }
+
+/* Responsiv design */
+@media (max-width: 640px) {
+  .modal-content {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .footer-left,
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .day-selector {
+    flex-wrap: wrap;
+  }
+  
+  .day-btn {
+    min-width: 60px;
   }
 }
