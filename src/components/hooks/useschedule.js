@@ -26,21 +26,21 @@ const getInitialActivityTypes = () => {
   }
   
   return [
-    { id: 'school', name: 'Skola', icon: '🎒', color: '#3b82f6' },
-    { id: 'preschool', name: 'Förskola', icon: '🧸', color: '#8b5cf6' },
-    { id: 'afterschool', name: 'Fritids', icon: '🎨', color: '#f59e0b' },
-    { id: 'sport', name: 'Sport', icon: '⚽', color: '#10b981' },
-    { id: 'music', name: 'Musik', icon: '🎵', color: '#ec4899' },
-    { id: 'doctor', name: 'Läkarbesök', icon: '🏥', color: '#ef4444' },
-    { id: 'dentist', name: 'Tandläkare', icon: '🦷', color: '#06b6d4' },
-    { id: 'party', name: 'Kalas', icon: '🎂', color: '#f97316' },
-    { id: 'homework', name: 'Läxor', icon: '📚', color: '#6366f1' },
-    { id: 'meal', name: 'Måltid', icon: '🍽️', color: '#84cc16' },
-    { id: 'meeting', name: 'Möte', icon: '💼', color: '#64748b' },
-    { id: 'travel', name: 'Resa', icon: '🚗', color: '#0ea5e9' },
-    { id: 'shopping', name: 'Handla', icon: '🛒', color: '#fb923c' },
-    { id: 'cleaning', name: 'Städning', icon: '🧹', color: '#a855f7' },
-    { id: 'other', name: 'Annat', icon: '📌', color: '#94a3b8' }
+    { id: 'school', name: 'Skola', color: '#3b82f6' },
+    { id: 'preschool', name: 'Förskola', color: '#8b5cf6' },
+    { id: 'afterschool', name: 'Fritids', color: '#f59e0b' },
+    { id: 'sport', name: 'Sport', color: '#10b981' },
+    { id: 'music', name: 'Musik', color: '#ec4899' },
+    { id: 'doctor', name: 'Läkarbesök', color: '#ef4444' },
+    { id: 'dentist', name: 'Tandläkare', color: '#06b6d4' },
+    { id: 'party', name: 'Kalas', color: '#f97316' },
+    { id: 'homework', name: 'Läxor', color: '#6366f1' },
+    { id: 'meal', name: 'Måltid', color: '#84cc16' },
+    { id: 'meeting', name: 'Möte', color: '#64748b' },
+    { id: 'travel', name: 'Resa', color: '#0ea5e9' },
+    { id: 'shopping', name: 'Handla', color: '#fb923c' },
+    { id: 'cleaning', name: 'Städning', color: '#a855f7' },
+    { id: 'other', name: 'Annat', color: '#94a3b8' }
   ];
 };
 
@@ -88,57 +88,94 @@ export const useSchedule = () => {
     localStorage.setItem(TYPES_KEY, JSON.stringify(activityTypes));
   }, [activityTypes]);
 
+  // Hjälpfunktion för att beräkna veckor mellan datum
+  const getWeeksBetweenDates = (startDate, endDate) => {
+    const weeks = [];
+    const current = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (current <= end) {
+      const weekNumber = getWeekNumber(current);
+      const year = current.getFullYear();
+      weeks.push({ week: weekNumber, year });
+      current.setDate(current.getDate() + 7);
+    }
+    
+    return weeks;
+  };
+
   // Lägg till aktivitet
   const addActivity = useCallback((activityData) => {
-    const newActivity = {
-      ...activityData,
-      id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: new Date().toISOString()
-    };
-    
-    // Om det är en återkommande aktivitet, skapa flera instanser
-    if (activityData.recurring && activityData.recurringWeeks > 1) {
+    const currentDate = new Date();
+    const currentWeekNumber = getWeekNumber(currentDate);
+    const currentYear = currentDate.getFullYear();
+
+    // Om det är en återkommande aktivitet
+    if (activityData.recurring && activityData.recurringEndDate) {
       const activities = [];
-      const startWeek = activityData.week || getWeekNumber(new Date());
-      const startYear = activityData.year || new Date().getFullYear();
+      const endDate = new Date(activityData.recurringEndDate);
+      const weeks = getWeeksBetweenDates(currentDate, endDate);
+      const recurringGroupId = `recurring-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      for (let i = 0; i < activityData.recurringWeeks; i++) {
-        let week = startWeek + i;
-        let year = startYear;
-        
-        // Hantera årsskifte
-        if (week > 52) {
-          week = week - 52;
-          year = year + 1;
-        }
-        
-        activities.push({
-          ...newActivity,
-          id: `activity-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 9)}`,
-          week,
-          year,
-          recurringGroupId: newActivity.id // Gruppera återkommande aktiviteter
+      // Skapa en aktivitet för varje dag i varje vecka
+      weeks.forEach(({ week, year }) => {
+        activityData.days.forEach(day => {
+          const newActivity = {
+            ...activityData,
+            id: `activity-${Date.now()}-${week}-${day}-${Math.random().toString(36).substr(2, 9)}`,
+            day: day,
+            week: week,
+            year: year,
+            recurringGroupId: recurringGroupId,
+            createdAt: new Date().toISOString()
+          };
+          
+          // Ta bort temporära fält
+          delete newActivity.days;
+          delete newActivity.recurringEndDate;
+          
+          activities.push(newActivity);
         });
-      }
+      });
       
       setActivities(prev => [...prev, ...activities]);
       return activities;
     } else {
-      setActivities(prev => [...prev, newActivity]);
-      return newActivity;
+      // Vanlig aktivitet eller enstaka aktivitet
+      const activities = [];
+      
+      activityData.days.forEach(day => {
+        const newActivity = {
+          ...activityData,
+          id: `activity-${Date.now()}-${day}-${Math.random().toString(36).substr(2, 9)}`,
+          day: day,
+          week: currentWeekNumber,
+          year: currentYear,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Ta bort temporära fält
+        delete newActivity.days;
+        delete newActivity.recurringEndDate;
+        
+        activities.push(newActivity);
+      });
+      
+      setActivities(prev => [...prev, ...activities]);
+      return activities;
     }
   }, []);
 
   // Uppdatera aktivitet
   const updateActivity = useCallback((id, updates) => {
     setActivities(prev => {
-      // Om det är en återkommande aktivitet, fråga om alla ska uppdateras
       const activity = prev.find(a => a.id === id);
+      
       if (activity?.recurringGroupId && updates.updateAllRecurring) {
         // Uppdatera alla i gruppen
         return prev.map(a => 
           a.recurringGroupId === activity.recurringGroupId
-            ? { ...a, ...updates, id: a.id, week: a.week, year: a.year }
+            ? { ...a, ...updates, id: a.id, week: a.week, year: a.year, day: a.day }
             : a
         );
       } else {
@@ -169,17 +206,12 @@ export const useSchedule = () => {
   // Hämta aktiviteter för en specifik vecka
   const getActivitiesForWeek = useCallback((weekNumber, year) => {
     return activities.filter(activity => {
-      // Återkommande aktiviteter utan specifik vecka visas alltid
-      if (activity.recurring && !activity.week) {
-        return true;
-      }
-      
       // Filtrera på vecka och år
       if (activity.week && activity.year) {
         return activity.week === weekNumber && activity.year === year;
       }
       
-      // Bakåtkompatibilitet
+      // Bakåtkompatibilitet för aktiviteter utan vecka/år
       return !activity.week;
     });
   }, [activities]);
@@ -276,7 +308,8 @@ export const useSchedule = () => {
       byType: {},
       byDay: {},
       totalHours: 0,
-      conflicts: []
+      conflicts: [],
+      recurringActivities: weekActivities.filter(a => a.recurringGroupId).length
     };
 
     // Analysera aktiviteter
@@ -302,11 +335,12 @@ export const useSchedule = () => {
         });
       }
       
-      // Per typ
-      if (!stats.byType[activity.type]) {
-        stats.byType[activity.type] = 0;
+      // Per typ (använd aktivitetsnamn istället för typ)
+      const activityName = activity.name || 'Okänd aktivitet';
+      if (!stats.byType[activityName]) {
+        stats.byType[activityName] = 0;
       }
-      stats.byType[activity.type]++;
+      stats.byType[activityName]++;
       
       // Per dag
       if (!stats.byDay[activity.day]) {

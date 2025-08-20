@@ -25,12 +25,6 @@ const ActivityBlock = ({
     familyMembers.find(m => m.id === id)
   ).filter(Boolean) || [];
   
-  // Hämta aktivitetstyp
-  const activityType = {
-    name: activity.name || 'Aktivitet', // Använd det nya namnfältet
-    icon: activity.icon || '📌',       // Använd den nya ikonen
-  };
-  
   // Formatera tid för visning
   const formatTimeRange = (start, end) => {
     return `${start} - ${end}`;
@@ -115,18 +109,14 @@ const ActivityBlock = ({
       onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={0}
-      aria-label={`${activityType.name} - ${participants.map(p => p.name).join(', ')} ${formatTimeRange(activity.startTime, activity.endTime)}`}
-      data-type={activity.type}
+      aria-label={`${activity.name} - ${participants.map(p => p.name).join(', ')} ${formatTimeRange(activity.startTime, activity.endTime)}`}
     >
       <div className="activity-content">
-        {/* Header med typ och varningar */}
+        {/* Header med aktivitetsnamn och varningar */}
         <div className="activity-header">
-          <span className="activity-icon" title={activityType.name}>
-            {activityType.icon}
+          <span className="activity-name" title={activity.name}>
+            {activity.name}
           </span>
-          {!isCompact && (
-            <span className="activity-type-name">{activityType.name}</span>
-          )}
           {hasImportantInfo && (
             <AlertCircle className="important-indicator" size={12} />
           )}
@@ -166,8 +156,7 @@ const ActivityBlock = ({
         <div className="activity-tooltip">
           <div className="tooltip-content">
             <div className="tooltip-header">
-              <span>{activityType.icon}</span>
-              <strong>{activityType.name}</strong>
+              <strong>{activity.name}</strong>
             </div>
             
             <div className="tooltip-participants">

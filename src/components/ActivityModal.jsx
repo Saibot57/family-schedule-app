@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    X, Save, Trash2, MapPin, Calendar, Clock, Users, Tag, Repeat, AlertCircle, Search, Smile
+    X, Save, Trash2, MapPin, Calendar, Clock, Users, Tag, Repeat, AlertCircle, Search
 } from 'lucide-react';
 import './ActivityModal.css';
-
-// Lista med ikoner att välja från
-const availableIcons = ['🎉', '⚽', '🎨', '🎵', '🏥', '🦷', '🎂', '📚', '🍽️', '💼', '🚗', '🛒', '🧹', '📞', '💻', '✈️', '🏃', 'swimmer', '‍🎓', '❤️'];
-
 
 const ActivityModal = ({
     isOpen,
@@ -20,10 +16,7 @@ const ActivityModal = ({
 
     const getInitialFormData = () => ({
         participants: [],
-        // Nya fält för anpassad aktivitet
         name: '',
-        icon: '🎉',
-        // Hanterar flera dagar
         days: [],
         startTime: '08:00',
         endTime: '09:00',
@@ -51,24 +44,21 @@ const ActivityModal = ({
         let initialData;
         if (activity) {
             if (activity.isNew) {
-                // Ny aktivitet från klick i schemat
                 initialData = {
                     ...getInitialFormData(),
-                    days: [activity.day], // Välj den klickade dagen
+                    days: [activity.day],
                     startTime: activity.startTime,
                     endTime: activity.endTime,
                 };
             } else {
-                // Redigera en existerande aktivitet
                 initialData = {
                     ...getInitialFormData(),
                     ...activity,
-                    days: [activity.day], // Läs in den existerande dagens aktivitet korrekt
+                    days: [activity.day],
                     participants: activity.participants || [],
                 };
             }
         } else {
-            // Helt ny aktivitet från "Ny aktivitet"-knappen
             initialData = getInitialFormData();
         }
         
@@ -108,7 +98,6 @@ const ActivityModal = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-
     const validateForm = () => {
         const newErrors = {};
         if (!formData.name) newErrors.name = 'Ange ett namn för aktiviteten';
@@ -125,6 +114,10 @@ const ActivityModal = ({
             }
         }
 
+        if (formData.recurring && !formData.recurringEndDate) {
+            newErrors.recurringEndDate = 'Ange slutdatum för återkommande aktivitet';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -134,14 +127,12 @@ const ActivityModal = ({
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
     };
 
-    // Hantera val av flera dagar
     const toggleDay = (day) => {
         const newDays = formData.days.includes(day)
             ? formData.days.filter(d => d !== day)
             : [...formData.days, day];
         handleChange('days', newDays);
     };
-
 
     const addParticipant = (memberId) => {
         handleChange('participants', [...formData.participants, memberId]);
@@ -155,7 +146,7 @@ const ActivityModal = ({
 
     const handleSave = () => {
         if (validateForm()) {
-            onSave(formData); // Skicka hela formulärdatan till App.jsx
+            onSave(formData);
         }
     };
 
@@ -164,6 +155,17 @@ const ActivityModal = ({
             onDelete(activity.id);
         }
         setShowDeleteConfirm(false);
+    };
+
+    // Beräkna antal veckor för återkommande aktivitet
+    const calculateWeeks = () => {
+        if (!formData.recurring || !formData.recurringEndDate) return 0;
+        
+        const today = new Date();
+        const endDate = new Date(formData.recurringEndDate);
+        const diffTime = endDate - today;
+        const diffWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+        return Math.max(1, diffWeeks);
     };
 
     if (!isOpen) return null;
@@ -177,29 +179,18 @@ const ActivityModal = ({
                 </div>
 
                 <div className="modal-body">
-                    {/* Anpassat namn och ikon */}
+                    {/* Aktivitetsnamn */}
                     <div className="form-group">
                         <label><Tag size={16} /> Aktivitet <span className="required">*</span></label>
-                        <div className="custom-activity-input">
-                            <div className="icon-picker-wrapper">
-                                <button className="icon-picker-btn">{formData.icon}</button>
-                                <div className="icon-picker-dropdown">
-                                    {availableIcons.map(icon => (
-                                        <button key={icon} onClick={() => handleChange('icon', icon)}>{icon}</button>
-                                    ))}
-                                </div>
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Namnge aktiviteten (t.ex. Fotbollsträning)"
-                                value={formData.name}
-                                onChange={(e) => handleChange('name', e.target.value)}
-                                className={errors.name ? 'error' : ''}
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            placeholder="Namnge aktiviteten (t.ex. Fotbollsträning)"
+                            value={formData.name}
+                            onChange={(e) => handleChange('name', e.target.value)}
+                            className={errors.name ? 'error' : ''}
+                        />
                         {errors.name && <span className="error-message">{errors.name}</span>}
                     </div>
-
 
                     {/* Deltagare */}
                     <div className="form-group" ref={searchRef}>
@@ -210,6 +201,7 @@ const ActivityModal = ({
                                 if (!member) return null;
                                 return (
                                     <span key={id} className="pill">
+                                        <span className="member-icon">{member.icon}</span>
                                         <span className="member-dot-small" style={{ backgroundColor: member.color }} />
                                         {member.name}
                                         <button onClick={() => removeParticipant(id)}><X size={12} /></button>
@@ -232,7 +224,9 @@ const ActivityModal = ({
                             <ul className="participant-dropdown">
                                 {filteredParticipants.map(member => (
                                     <li key={member.id} onClick={() => addParticipant(member.id)}>
-                                        <span className="member-dot-small" style={{ backgroundColor: member.color }} /> {member.name}
+                                        <span className="member-icon">{member.icon}</span>
+                                        <span className="member-dot-small" style={{ backgroundColor: member.color }} />
+                                        {member.name}
                                     </li>
                                 ))}
                             </ul>
@@ -247,6 +241,7 @@ const ActivityModal = ({
                             {allDays.map(day => (
                                 <button
                                     key={day}
+                                    type="button"
                                     onClick={() => toggleDay(day)}
                                     className={`day-btn ${formData.days.includes(day) ? 'selected' : ''}`}
                                 >
@@ -256,7 +251,6 @@ const ActivityModal = ({
                         </div>
                         {errors.days && <span className="error-message">{errors.days}</span>}
                     </div>
-
 
                     {/* Tid */}
                      <div className="form-row">
@@ -280,6 +274,63 @@ const ActivityModal = ({
                     <div className="form-group">
                         <label>Anteckningar</label>
                         <textarea value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} rows="3" placeholder="T.ex. Ta med gympakläder..." />
+                    </div>
+
+                    {/* Återkommande aktivitet */}
+                    <div className="form-group">
+                        <div className="recurring-checkbox">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.recurring}
+                                    onChange={(e) => handleChange('recurring', e.target.checked)}
+                                />
+                                <Repeat size={16} />
+                                Återkommande aktivitet
+                            </label>
+                        </div>
+                        
+                        {formData.recurring && (
+                            <div className="recurring-options">
+                                <div className="recurring-info">
+                                    <AlertCircle size={16} className="info-icon" />
+                                    <span>Aktiviteten kommer att upprepas varje vecka på valda dagar</span>
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label>Upprepa till och med <span className="required">*</span></label>
+                                    <input
+                                        type="date"
+                                        value={formData.recurringEndDate}
+                                        onChange={(e) => handleChange('recurringEndDate', e.target.value)}
+                                        className={errors.recurringEndDate ? 'error' : ''}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                    {errors.recurringEndDate && <span className="error-message">{errors.recurringEndDate}</span>}
+                                </div>
+
+                                {formData.recurringEndDate && (
+                                    <div className="recurring-preview">
+                                        <span className="preview-text">
+                                            Skapar ca {calculateWeeks()} aktiviteter ({formData.days.length} dagar/vecka)
+                                        </span>
+                                    </div>
+                                )}
+
+                                {activity && !activity.isNew && activity.recurringGroupId && (
+                                    <div className="recurring-update-options">
+                                        <label className="checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.updateAllRecurring}
+                                                onChange={(e) => handleChange('updateAllRecurring', e.target.checked)}
+                                            />
+                                            Uppdatera alla framtida aktiviteter i serien
+                                        </label>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
