@@ -26,21 +26,21 @@ const getInitialActivityTypes = () => {
   }
   
   return [
-    { id: 'school', name: 'Skola', color: '#3b82f6' },
-    { id: 'preschool', name: 'Förskola', color: '#8b5cf6' },
-    { id: 'afterschool', name: 'Fritids', color: '#f59e0b' },
-    { id: 'sport', name: 'Sport', color: '#10b981' },
-    { id: 'music', name: 'Musik', color: '#ec4899' },
-    { id: 'doctor', name: 'Läkarbesök', color: '#ef4444' },
-    { id: 'dentist', name: 'Tandläkare', color: '#06b6d4' },
-    { id: 'party', name: 'Kalas', color: '#f97316' },
-    { id: 'homework', name: 'Läxor', color: '#6366f1' },
-    { id: 'meal', name: 'Måltid', color: '#84cc16' },
-    { id: 'meeting', name: 'Möte', color: '#64748b' },
-    { id: 'travel', name: 'Resa', color: '#0ea5e9' },
-    { id: 'shopping', name: 'Handla', color: '#fb923c' },
-    { id: 'cleaning', name: 'Städning', color: '#a855f7' },
-    { id: 'other', name: 'Annat', color: '#94a3b8' }
+    { id: 'school', name: 'Skola', icon: '🎒', color: '#3b82f6' },
+    { id: 'preschool', name: 'Förskola', icon: '🧸', color: '#8b5cf6' },
+    { id: 'afterschool', name: 'Fritids', icon: '🎨', color: '#f59e0b' },
+    { id: 'sport', name: 'Sport', icon: '⚽', color: '#10b981' },
+    { id: 'music', name: 'Musik', icon: '🎵', color: '#ec4899' },
+    { id: 'doctor', name: 'Läkarbesök', icon: '🏥', color: '#ef4444' },
+    { id: 'dentist', name: 'Tandläkare', icon: '🦷', color: '#06b6d4' },
+    { id: 'party', name: 'Kalas', icon: '🎂', color: '#f97316' },
+    { id: 'homework', name: 'Läxor', icon: '📚', color: '#6366f1' },
+    { id: 'meal', name: 'Måltid', icon: '🍽️', color: '#84cc16' },
+    { id: 'meeting', name: 'Möte', icon: '💼', color: '#64748b' },
+    { id: 'travel', name: 'Resa', icon: '🚗', color: '#0ea5e9' },
+    { id: 'shopping', name: 'Handla', icon: '🛒', color: '#fb923c' },
+    { id: 'cleaning', name: 'Städning', icon: '🧹', color: '#a855f7' },
+    { id: 'other', name: 'Annat', icon: '📌', color: '#94a3b8' }
   ];
 };
 
@@ -117,6 +117,8 @@ export const useSchedule = () => {
       const weeks = getWeeksBetweenDates(currentDate, endDate);
       const recurringGroupId = `recurring-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
+      console.log('Skapar återkommande aktiviteter för:', weeks.length, 'veckor');
+      
       // Skapa en aktivitet för varje dag i varje vecka
       weeks.forEach(({ week, year }) => {
         activityData.days.forEach(day => {
@@ -127,17 +129,20 @@ export const useSchedule = () => {
             week: week,
             year: year,
             recurringGroupId: recurringGroupId,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            recurring: true // Markera som återkommande
           };
           
           // Ta bort temporära fält
           delete newActivity.days;
           delete newActivity.recurringEndDate;
+          delete newActivity.updateAllRecurring;
           
           activities.push(newActivity);
         });
       });
       
+      console.log('Skapade', activities.length, 'återkommande aktiviteter');
       setActivities(prev => [...prev, ...activities]);
       return activities;
     } else {
@@ -149,14 +154,15 @@ export const useSchedule = () => {
           ...activityData,
           id: `activity-${Date.now()}-${day}-${Math.random().toString(36).substr(2, 9)}`,
           day: day,
-          week: currentWeekNumber,
-          year: currentYear,
+          week: activityData.week || currentWeekNumber,
+          year: activityData.year || currentYear,
           createdAt: new Date().toISOString()
         };
         
         // Ta bort temporära fält
         delete newActivity.days;
         delete newActivity.recurringEndDate;
+        delete newActivity.updateAllRecurring;
         
         activities.push(newActivity);
       });
@@ -173,9 +179,10 @@ export const useSchedule = () => {
       
       if (activity?.recurringGroupId && updates.updateAllRecurring) {
         // Uppdatera alla i gruppen
+        console.log('Uppdaterar alla aktiviteter i återkommande grupp:', activity.recurringGroupId);
         return prev.map(a => 
           a.recurringGroupId === activity.recurringGroupId
-            ? { ...a, ...updates, id: a.id, week: a.week, year: a.year, day: a.day }
+            ? { ...a, ...updates, id: a.id, week: a.week, year: a.year, day: a.day, recurringGroupId: a.recurringGroupId }
             : a
         );
       } else {
@@ -195,6 +202,7 @@ export const useSchedule = () => {
       const activity = prev.find(a => a.id === id);
       if (activity?.recurringGroupId && deleteAll) {
         // Ta bort alla i gruppen
+        console.log('Tar bort alla aktiviteter i återkommande grupp:', activity.recurringGroupId);
         return prev.filter(a => a.recurringGroupId !== activity.recurringGroupId);
       } else {
         // Ta bort bara denna
@@ -206,13 +214,17 @@ export const useSchedule = () => {
   // Hämta aktiviteter för en specifik vecka
   const getActivitiesForWeek = useCallback((weekNumber, year) => {
     return activities.filter(activity => {
-      // Filtrera på vecka och år
+      // Filtrera på vecka och år - alla aktiviteter ska ha detta satt
       if (activity.week && activity.year) {
         return activity.week === weekNumber && activity.year === year;
       }
       
-      // Bakåtkompatibilitet för aktiviteter utan vecka/år
-      return !activity.week;
+      // Bakåtkompatibilitet för gamla aktiviteter utan vecka/år
+      if (!activity.week && !activity.year) {
+        return true;
+      }
+      
+      return false;
     });
   }, [activities]);
 

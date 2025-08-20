@@ -4,6 +4,8 @@ import {
 } from 'lucide-react';
 import './ActivityModal.css';
 
+// Tillagd CSS för nya element skulle behöva läggas till i ActivityModal.css:
+
 // Utökad lista med ikoner organiserade i kategorier
 const iconCategories = {
     'Skola & Utbildning': ['🎒', '📚', '✏️', '📝', '🎓', '🏫', '📖', '📊', '🧮', '🔬', '🎨', '🖍️', '📐', '📏', '🗂️'],
@@ -71,11 +73,14 @@ const ActivityModal = ({
                     endTime: activity.endTime,
                 };
             } else {
+                // När vi redigerar en befintlig aktivitet
                 initialData = {
                     ...getInitialFormData(),
                     ...activity,
                     days: [activity.day],
                     participants: activity.participants || [],
+                    recurring: Boolean(activity.recurringGroupId), // Sätt recurring baserat på om det finns en groupId
+                    recurringEndDate: '', // Töm detta för redigering
                 };
             }
         } else {
@@ -208,9 +213,9 @@ const ActivityModal = ({
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = (deleteAll = false) => {
         if (activity && !activity.isNew) {
-            onDelete(activity.id);
+            onDelete(activity.id, deleteAll);
         }
         setShowDeleteConfirm(false);
     };
@@ -228,12 +233,19 @@ const ActivityModal = ({
 
     if (!isOpen) return null;
 
+    const isEditingRecurring = activity && !activity.isNew && activity.recurringGroupId;
+
     return (
         <>
             <div className="modal-overlay" onClick={onClose}>
                 <div className="modal-content" onClick={e => e.stopPropagation()}>
                     <div className="modal-header">
-                        <h2>{activity && !activity.isNew ? 'Redigera aktivitet' : 'Ny aktivitet'}</h2>
+                        <h2>
+                            {activity && !activity.isNew ? 'Redigera aktivitet' : 'Ny aktivitet'}
+                            {isEditingRecurring && (
+                                <span className="recurring-badge"> (Återkommande)</span>
+                            )}
+                        </h2>
                         <button className="close-button" onClick={onClose}><X size={20} /></button>
                     </div>
 
@@ -315,11 +327,17 @@ const ActivityModal = ({
                                         type="button"
                                         onClick={() => toggleDay(day)}
                                         className={`day-btn ${formData.days.includes(day) ? 'selected' : ''}`}
+                                        disabled={isEditingRecurring} // Kan inte ändra dagar för återkommande aktiviteter
                                     >
                                         {day.substring(0, 3)}
                                     </button>
                                 ))}
                             </div>
+                            {isEditingRecurring && (
+                                <small style={{color: '#6b7280', marginTop: '0.5rem', display: 'block'}}>
+                                    Dagval kan inte ändras för återkommande aktiviteter
+                                </small>
+                            )}
                             {errors.days && <span className="error-message">{errors.days}</span>}
                         </div>
 
@@ -347,62 +365,73 @@ const ActivityModal = ({
                             <textarea value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} rows="3" placeholder="T.ex. Ta med gympakläder..." />
                         </div>
 
-                        {/* Återkommande aktivitet */}
-                        <div className="form-group">
-                            <div className="recurring-checkbox">
-                                <label className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.recurring}
-                                        onChange={(e) => handleChange('recurring', e.target.checked)}
-                                    />
-                                    <Repeat size={16} />
-                                    Återkommande aktivitet
-                                </label>
-                            </div>
-                            
-                            {formData.recurring && (
-                                <div className="recurring-options">
-                                    <div className="recurring-info">
-                                        <AlertCircle size={16} className="info-icon" />
-                                        <span>Aktiviteten kommer att upprepas varje vecka på valda dagar</span>
-                                    </div>
-                                    
-                                    <div className="form-group">
-                                        <label>Upprepa till och med <span className="required">*</span></label>
+                        {/* Återkommande aktivitet - endast för nya aktiviteter */}
+                        {!isEditingRecurring && (
+                            <div className="form-group">
+                                <div className="recurring-checkbox">
+                                    <label className="checkbox-label">
                                         <input
-                                            type="date"
-                                            value={formData.recurringEndDate}
-                                            onChange={(e) => handleChange('recurringEndDate', e.target.value)}
-                                            className={errors.recurringEndDate ? 'error' : ''}
-                                            min={new Date().toISOString().split('T')[0]}
+                                            type="checkbox"
+                                            checked={formData.recurring}
+                                            onChange={(e) => handleChange('recurring', e.target.checked)}
                                         />
-                                        {errors.recurringEndDate && <span className="error-message">{errors.recurringEndDate}</span>}
-                                    </div>
-
-                                    {formData.recurringEndDate && (
-                                        <div className="recurring-preview">
-                                            <span className="preview-text">
-                                                Skapar ca {calculateWeeks()} aktiviteter ({formData.days.length} dagar/vecka)
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {activity && !activity.isNew && activity.recurringGroupId && (
-                                        <div className="recurring-update-options">
-                                            <label className="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.updateAllRecurring}
-                                                    onChange={(e) => handleChange('updateAllRecurring', e.target.checked)}
-                                                />
-                                                Uppdatera alla framtida aktiviteter i serien
-                                            </label>
-                                        </div>
-                                    )}
+                                        <Repeat size={16} />
+                                        Återkommande aktivitet
+                                    </label>
                                 </div>
-                            )}
-                        </div>
+                                
+                                {formData.recurring && (
+                                    <div className="recurring-options">
+                                        <div className="recurring-info">
+                                            <AlertCircle size={16} className="info-icon" />
+                                            <span>Aktiviteten kommer att upprepas varje vecka på valda dagar</span>
+                                        </div>
+                                        
+                                        <div className="form-group">
+                                            <label>Upprepa till och med <span className="required">*</span></label>
+                                            <input
+                                                type="date"
+                                                value={formData.recurringEndDate}
+                                                onChange={(e) => handleChange('recurringEndDate', e.target.value)}
+                                                className={errors.recurringEndDate ? 'error' : ''}
+                                                min={new Date().toISOString().split('T')[0]}
+                                            />
+                                            {errors.recurringEndDate && <span className="error-message">{errors.recurringEndDate}</span>}
+                                        </div>
+
+                                        {formData.recurringEndDate && (
+                                            <div className="recurring-preview">
+                                                <span className="preview-text">
+                                                    Skapar ca {calculateWeeks()} aktiviteter ({formData.days.length} dagar/vecka)
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Uppdatera alla återkommande - endast för redigering av återkommande */}
+                        {isEditingRecurring && (
+                            <div className="form-group">
+                                <div className="recurring-update-options">
+                                    <label className="checkbox-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.updateAllRecurring}
+                                            onChange={(e) => handleChange('updateAllRecurring', e.target.checked)}
+                                        />
+                                        Uppdatera alla framtida aktiviteter i serien
+                                    </label>
+                                    <small style={{color: '#6b7280', marginTop: '0.5rem', display: 'block'}}>
+                                        {formData.updateAllRecurring ? 
+                                            'Alla aktiviteter i denna återkommande serie kommer att uppdateras' : 
+                                            'Endast denna aktivitet kommer att uppdateras'
+                                        }
+                                    </small>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="modal-footer">
@@ -411,11 +440,28 @@ const ActivityModal = ({
                                 showDeleteConfirm ? (
                                     <div className="delete-confirm">
                                         <span>Säker?</span>
-                                        <button className="btn btn-danger-confirm" onClick={handleDelete}>Ja, ta bort</button>
-                                        <button className="btn btn-text" onClick={() => setShowDeleteConfirm(false)}>Avbryt</button>
+                                        {isEditingRecurring ? (
+                                            <>
+                                                <button className="btn btn-danger-confirm" onClick={() => handleDelete(false)}>
+                                                    Bara denna
+                                                </button>
+                                                <button className="btn btn-danger-confirm" onClick={() => handleDelete(true)}>
+                                                    Alla
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button className="btn btn-danger-confirm" onClick={() => handleDelete(false)}>
+                                                Ja, ta bort
+                                            </button>
+                                        )}
+                                        <button className="btn btn-text" onClick={() => setShowDeleteConfirm(false)}>
+                                            Avbryt
+                                        </button>
                                     </div>
                                 ) : (
-                                    <button className="btn btn-danger" onClick={() => setShowDeleteConfirm(true)}><Trash2 size={16} /> Ta bort</button>
+                                    <button className="btn btn-danger" onClick={() => setShowDeleteConfirm(true)}>
+                                        <Trash2 size={16} /> Ta bort
+                                    </button>
                                 )
                             )}
                         </div>
