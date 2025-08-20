@@ -4,6 +4,20 @@ import {
 } from 'lucide-react';
 import './ActivityModal.css';
 
+// Utökad lista med ikoner organiserade i kategorier
+const iconCategories = {
+    'Skola & Utbildning': ['🎒', '📚', '✏️', '📝', '🎓', '🏫', '📖', '📊', '🧮', '🔬', '🎨', '🖍️', '📐', '📏', '🗂️'],
+    'Sport & Aktiviteter': ['⚽', '🏀', '🏈', '🎾', '🏐', '🏓', '🏸', '🥊', '🏊', '🚴', '🏃', '🧘', '🤸', '🏋️', '⛹️'],
+    'Musik & Kreativitet': ['🎵', '🎶', '🎸', '🎹', '🥁', '🎤', '🎺', '🎻', '🎨', '🖌️', '🎭', '📸', '🎬', '🎪', '🎨'],
+    'Hälsa & Vård': ['🏥', '💊', '🩺', '🦷', '👁️', '🧬', '💉', '🩹', '🧴', '🔬', '⚕️', '🏥', '💊', '🩺', '🦷'],
+    'Mat & Måltider': ['🍽️', '🥄', '🍴', '🥘', '🍕', '🍔', '🌮', '🥪', '🥗', '🍱', '🧑‍🍳', '👨‍🍳', '🥯', '🍞', '🥐'],
+    'Transport & Resor': ['🚗', '🚌', '🚊', '🚂', '✈️', '🚁', '🛴', '🚲', '🛵', '🚤', '⛵', '🗺️', '🧳', '🎒', '📍'],
+    'Hem & Vardag': ['🏠', '🧹', '🧺', '💻', '📱', '📞', '🛒', '🛍️', '💼', '📋', '🗓️', '⏰', '🔑', '💡', '🛏️'],
+    'Fritid & Nöje': ['🎮', '🎯', '🎲', '🧩', '🎳', '🎪', '🎢', '🎡', '🎨', '📺', '🎬', '🍿', '🎉', '🎂', '🎈'],
+    'Familj & Vänskap': ['👨‍👩‍👧‍👦', '👪', '👶', '👧', '👦', '👩', '👨', '👵', '👴', '❤️', '💝', '🤗', '👫', '👬', '👭'],
+    'Övrigt': ['📌', '⭐', '🔥', '💎', '🌟', '✨', '🎯', '🏆', '🥇', '🎖️', '🏅', '💯', '✅', '❗', '⚠️']
+};
+
 const ActivityModal = ({
     isOpen,
     activity,
@@ -17,6 +31,7 @@ const ActivityModal = ({
     const getInitialFormData = () => ({
         participants: [],
         name: '',
+        icon: '🎉',
         days: [],
         startTime: '08:00',
         endTime: '09:00',
@@ -36,6 +51,11 @@ const ActivityModal = ({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredParticipants, setFilteredParticipants] = useState([]);
     const searchRef = useRef(null);
+
+    // States för ikonväljare
+    const [showIconPicker, setShowIconPicker] = useState(false);
+    const [iconSearch, setIconSearch] = useState('');
+    const [filteredIcons, setFilteredIcons] = useState(iconCategories);
 
     // Initiera formulärdata
     useEffect(() => {
@@ -66,6 +86,8 @@ const ActivityModal = ({
         setErrors({});
         setShowDeleteConfirm(false);
         setParticipantSearch('');
+        setIconSearch('');
+        setFilteredIcons(iconCategories);
 
     }, [activity, isOpen]);
 
@@ -86,6 +108,37 @@ const ActivityModal = ({
             );
         }
     }, [participantSearch, formData.participants, familyMembers]);
+
+    // Filtrera ikoner baserat på sökning
+    useEffect(() => {
+        if (iconSearch === '') {
+            setFilteredIcons(iconCategories);
+        } else {
+            const searchTerm = iconSearch.toLowerCase();
+            const filtered = {};
+            
+            Object.entries(iconCategories).forEach(([category, icons]) => {
+                const matchingIcons = icons.filter(icon => {
+                    return category.toLowerCase().includes(searchTerm);
+                });
+                
+                if (matchingIcons.length > 0) {
+                    filtered[category] = matchingIcons;
+                }
+            });
+
+            if (Object.keys(filtered).length === 0) {
+                const allIcons = Object.values(iconCategories).flat();
+                const matchingIcons = allIcons.filter(icon => true);
+                
+                if (matchingIcons.length > 0) {
+                    filtered['Sökresultat'] = matchingIcons;
+                }
+            }
+            
+            setFilteredIcons(filtered);
+        }
+    }, [iconSearch]);
 
     // Stäng dropdown vid klick utanför
     useEffect(() => {
@@ -144,6 +197,11 @@ const ActivityModal = ({
         handleChange('participants', formData.participants.filter(id => id !== memberId));
     };
 
+    const handleIconSelect = (icon) => {
+        handleChange('icon', icon);
+        setShowIconPicker(false);
+    };
+
     const handleSave = () => {
         if (validateForm()) {
             onSave(formData);
@@ -171,190 +229,261 @@ const ActivityModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h2>{activity && !activity.isNew ? 'Redigera aktivitet' : 'Ny aktivitet'}</h2>
-                    <button className="close-button" onClick={onClose}><X size={20} /></button>
-                </div>
-
-                <div className="modal-body">
-                    {/* Aktivitetsnamn */}
-                    <div className="form-group">
-                        <label><Tag size={16} /> Aktivitet <span className="required">*</span></label>
-                        <input
-                            type="text"
-                            placeholder="Namnge aktiviteten (t.ex. Fotbollsträning)"
-                            value={formData.name}
-                            onChange={(e) => handleChange('name', e.target.value)}
-                            className={errors.name ? 'error' : ''}
-                        />
-                        {errors.name && <span className="error-message">{errors.name}</span>}
+        <>
+            <div className="modal-overlay" onClick={onClose}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                    <div className="modal-header">
+                        <h2>{activity && !activity.isNew ? 'Redigera aktivitet' : 'Ny aktivitet'}</h2>
+                        <button className="close-button" onClick={onClose}><X size={20} /></button>
                     </div>
 
-                    {/* Deltagare */}
-                    <div className="form-group" ref={searchRef}>
-                         <label><Users size={16} /> Deltagare <span className="required">*</span></label>
-                         <div className="participant-pills">
-                            {formData.participants.map(id => {
-                                const member = familyMembers.find(m => m.id === id);
-                                if (!member) return null;
-                                return (
-                                    <span key={id} className="pill">
-                                        <span className="member-icon">{member.icon}</span>
-                                        <span className="member-dot-small" style={{ backgroundColor: member.color }} />
-                                        {member.name}
-                                        <button onClick={() => removeParticipant(id)}><X size={12} /></button>
-                                    </span>
-                                );
-                            })}
-                        </div>
-                        <div className="search-container">
-                            <Search size={16} className="search-icon" />
-                            <input
-                                type="text"
-                                value={participantSearch}
-                                onChange={(e) => setParticipantSearch(e.target.value)}
-                                onFocus={() => setIsDropdownOpen(true)}
-                                placeholder="Sök och lägg till deltagare..."
-                                className="participant-search-input"
-                            />
-                        </div>
-                        {isDropdownOpen && filteredParticipants.length > 0 && (
-                            <ul className="participant-dropdown">
-                                {filteredParticipants.map(member => (
-                                    <li key={member.id} onClick={() => addParticipant(member.id)}>
-                                        <span className="member-icon">{member.icon}</span>
-                                        <span className="member-dot-small" style={{ backgroundColor: member.color }} />
-                                        {member.name}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        {errors.participants && <span className="error-message">{errors.participants}</span>}
-                    </div>
-
-                    {/* Val av flera dagar */}
-                    <div className="form-group">
-                        <label><Calendar size={16} /> Dagar <span className="required">*</span></label>
-                        <div className="day-selector">
-                            {allDays.map(day => (
-                                <button
-                                    key={day}
-                                    type="button"
-                                    onClick={() => toggleDay(day)}
-                                    className={`day-btn ${formData.days.includes(day) ? 'selected' : ''}`}
-                                >
-                                    {day.substring(0, 3)}
-                                </button>
-                            ))}
-                        </div>
-                        {errors.days && <span className="error-message">{errors.days}</span>}
-                    </div>
-
-                    {/* Tid */}
-                     <div className="form-row">
+                    <div className="modal-body">
+                        {/* Anpassat namn och ikon */}
                         <div className="form-group">
-                            <label><Clock size={16} /> Starttid <span className="required">*</span></label>
-                            <input type="time" value={formData.startTime} onChange={(e) => handleChange('startTime', e.target.value)} className={errors.startTime ? 'error' : ''} />
-                            {errors.startTime && <span className="error-message">{errors.startTime}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label>Sluttid <span className="required">*</span></label>
-                            <input type="time" value={formData.endTime} onChange={(e) => handleChange('endTime', e.target.value)} className={errors.endTime ? 'error' : ''} />
-                            {errors.endTime && <span className="error-message">{errors.endTime}</span>}
-                        </div>
-                    </div>
-
-                    {/* Plats & Anteckningar */}
-                    <div className="form-group">
-                        <label><MapPin size={16} /> Plats</label>
-                        <input type="text" value={formData.location} onChange={(e) => handleChange('location', e.target.value)} placeholder="T.ex. Sporthallen..." />
-                    </div>
-                    <div className="form-group">
-                        <label>Anteckningar</label>
-                        <textarea value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} rows="3" placeholder="T.ex. Ta med gympakläder..." />
-                    </div>
-
-                    {/* Återkommande aktivitet */}
-                    <div className="form-group">
-                        <div className="recurring-checkbox">
-                            <label className="checkbox-label">
+                            <label><Tag size={16} /> Aktivitet <span className="required">*</span></label>
+                            <div className="custom-activity-input">
+                                <div className="icon-picker-wrapper">
+                                    <button 
+                                        type="button"
+                                        className="icon-picker-btn"
+                                        onClick={() => setShowIconPicker(true)}
+                                        title="Välj ikon"
+                                    >
+                                        {formData.icon}
+                                    </button>
+                                </div>
                                 <input
-                                    type="checkbox"
-                                    checked={formData.recurring}
-                                    onChange={(e) => handleChange('recurring', e.target.checked)}
+                                    type="text"
+                                    placeholder="Namnge aktiviteten (t.ex. Fotbollsträning)"
+                                    value={formData.name}
+                                    onChange={(e) => handleChange('name', e.target.value)}
+                                    className={errors.name ? 'error' : ''}
                                 />
-                                <Repeat size={16} />
-                                Återkommande aktivitet
-                            </label>
-                        </div>
-                        
-                        {formData.recurring && (
-                            <div className="recurring-options">
-                                <div className="recurring-info">
-                                    <AlertCircle size={16} className="info-icon" />
-                                    <span>Aktiviteten kommer att upprepas varje vecka på valda dagar</span>
-                                </div>
-                                
-                                <div className="form-group">
-                                    <label>Upprepa till och med <span className="required">*</span></label>
-                                    <input
-                                        type="date"
-                                        value={formData.recurringEndDate}
-                                        onChange={(e) => handleChange('recurringEndDate', e.target.value)}
-                                        className={errors.recurringEndDate ? 'error' : ''}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
-                                    {errors.recurringEndDate && <span className="error-message">{errors.recurringEndDate}</span>}
-                                </div>
-
-                                {formData.recurringEndDate && (
-                                    <div className="recurring-preview">
-                                        <span className="preview-text">
-                                            Skapar ca {calculateWeeks()} aktiviteter ({formData.days.length} dagar/vecka)
-                                        </span>
-                                    </div>
-                                )}
-
-                                {activity && !activity.isNew && activity.recurringGroupId && (
-                                    <div className="recurring-update-options">
-                                        <label className="checkbox-label">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.updateAllRecurring}
-                                                onChange={(e) => handleChange('updateAllRecurring', e.target.checked)}
-                                            />
-                                            Uppdatera alla framtida aktiviteter i serien
-                                        </label>
-                                    </div>
-                                )}
                             </div>
-                        )}
-                    </div>
-                </div>
+                            {errors.name && <span className="error-message">{errors.name}</span>}
+                        </div>
 
-                <div className="modal-footer">
-                    <div className="footer-left">
-                        {activity && !activity.isNew && (
-                            showDeleteConfirm ? (
-                                <div className="delete-confirm">
-                                    <span>Säker?</span>
-                                    <button className="btn btn-danger-confirm" onClick={handleDelete}>Ja, ta bort</button>
-                                    <button className="btn btn-text" onClick={() => setShowDeleteConfirm(false)}>Avbryt</button>
+                        {/* Deltagare */}
+                        <div className="form-group" ref={searchRef}>
+                             <label><Users size={16} /> Deltagare <span className="required">*</span></label>
+                             <div className="participant-pills">
+                                {formData.participants.map(id => {
+                                    const member = familyMembers.find(m => m.id === id);
+                                    if (!member) return null;
+                                    return (
+                                        <span key={id} className="pill">
+                                            <span className="member-icon">{member.icon}</span>
+                                            <span className="member-dot-small" style={{ backgroundColor: member.color }} />
+                                            {member.name}
+                                            <button onClick={() => removeParticipant(id)}><X size={12} /></button>
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                            <div className="search-container">
+                                <Search size={16} className="search-icon" />
+                                <input
+                                    type="text"
+                                    value={participantSearch}
+                                    onChange={(e) => setParticipantSearch(e.target.value)}
+                                    onFocus={() => setIsDropdownOpen(true)}
+                                    placeholder="Sök och lägg till deltagare..."
+                                    className="participant-search-input"
+                                />
+                            </div>
+                            {isDropdownOpen && filteredParticipants.length > 0 && (
+                                <ul className="participant-dropdown">
+                                    {filteredParticipants.map(member => (
+                                        <li key={member.id} onClick={() => addParticipant(member.id)}>
+                                            <span className="member-icon">{member.icon}</span>
+                                            <span className="member-dot-small" style={{ backgroundColor: member.color }} />
+                                            {member.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            {errors.participants && <span className="error-message">{errors.participants}</span>}
+                        </div>
+
+                        {/* Val av flera dagar */}
+                        <div className="form-group">
+                            <label><Calendar size={16} /> Dagar <span className="required">*</span></label>
+                            <div className="day-selector">
+                                {allDays.map(day => (
+                                    <button
+                                        key={day}
+                                        type="button"
+                                        onClick={() => toggleDay(day)}
+                                        className={`day-btn ${formData.days.includes(day) ? 'selected' : ''}`}
+                                    >
+                                        {day.substring(0, 3)}
+                                    </button>
+                                ))}
+                            </div>
+                            {errors.days && <span className="error-message">{errors.days}</span>}
+                        </div>
+
+                        {/* Tid */}
+                         <div className="form-row">
+                            <div className="form-group">
+                                <label><Clock size={16} /> Starttid <span className="required">*</span></label>
+                                <input type="time" value={formData.startTime} onChange={(e) => handleChange('startTime', e.target.value)} className={errors.startTime ? 'error' : ''} />
+                                {errors.startTime && <span className="error-message">{errors.startTime}</span>}
+                            </div>
+                            <div className="form-group">
+                                <label>Sluttid <span className="required">*</span></label>
+                                <input type="time" value={formData.endTime} onChange={(e) => handleChange('endTime', e.target.value)} className={errors.endTime ? 'error' : ''} />
+                                {errors.endTime && <span className="error-message">{errors.endTime}</span>}
+                            </div>
+                        </div>
+
+                        {/* Plats & Anteckningar */}
+                        <div className="form-group">
+                            <label><MapPin size={16} /> Plats</label>
+                            <input type="text" value={formData.location} onChange={(e) => handleChange('location', e.target.value)} placeholder="T.ex. Sporthallen..." />
+                        </div>
+                        <div className="form-group">
+                            <label>Anteckningar</label>
+                            <textarea value={formData.notes} onChange={(e) => handleChange('notes', e.target.value)} rows="3" placeholder="T.ex. Ta med gympakläder..." />
+                        </div>
+
+                        {/* Återkommande aktivitet */}
+                        <div className="form-group">
+                            <div className="recurring-checkbox">
+                                <label className="checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.recurring}
+                                        onChange={(e) => handleChange('recurring', e.target.checked)}
+                                    />
+                                    <Repeat size={16} />
+                                    Återkommande aktivitet
+                                </label>
+                            </div>
+                            
+                            {formData.recurring && (
+                                <div className="recurring-options">
+                                    <div className="recurring-info">
+                                        <AlertCircle size={16} className="info-icon" />
+                                        <span>Aktiviteten kommer att upprepas varje vecka på valda dagar</span>
+                                    </div>
+                                    
+                                    <div className="form-group">
+                                        <label>Upprepa till och med <span className="required">*</span></label>
+                                        <input
+                                            type="date"
+                                            value={formData.recurringEndDate}
+                                            onChange={(e) => handleChange('recurringEndDate', e.target.value)}
+                                            className={errors.recurringEndDate ? 'error' : ''}
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                        {errors.recurringEndDate && <span className="error-message">{errors.recurringEndDate}</span>}
+                                    </div>
+
+                                    {formData.recurringEndDate && (
+                                        <div className="recurring-preview">
+                                            <span className="preview-text">
+                                                Skapar ca {calculateWeeks()} aktiviteter ({formData.days.length} dagar/vecka)
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {activity && !activity.isNew && activity.recurringGroupId && (
+                                        <div className="recurring-update-options">
+                                            <label className="checkbox-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.updateAllRecurring}
+                                                    onChange={(e) => handleChange('updateAllRecurring', e.target.checked)}
+                                                />
+                                                Uppdatera alla framtida aktiviteter i serien
+                                            </label>
+                                        </div>
+                                    )}
                                 </div>
-                            ) : (
-                                <button className="btn btn-danger" onClick={() => setShowDeleteConfirm(true)}><Trash2 size={16} /> Ta bort</button>
-                            )
-                        )}
+                            )}
+                        </div>
                     </div>
-                    <div className="footer-right">
-                        <button className="btn btn-text" onClick={onClose}>Avbryt</button>
-                        <button className="btn btn-primary" onClick={handleSave}><Save size={16} /> Spara</button>
+
+                    <div className="modal-footer">
+                        <div className="footer-left">
+                            {activity && !activity.isNew && (
+                                showDeleteConfirm ? (
+                                    <div className="delete-confirm">
+                                        <span>Säker?</span>
+                                        <button className="btn btn-danger-confirm" onClick={handleDelete}>Ja, ta bort</button>
+                                        <button className="btn btn-text" onClick={() => setShowDeleteConfirm(false)}>Avbryt</button>
+                                    </div>
+                                ) : (
+                                    <button className="btn btn-danger" onClick={() => setShowDeleteConfirm(true)}><Trash2 size={16} /> Ta bort</button>
+                                )
+                            )}
+                        </div>
+                        <div className="footer-right">
+                            <button className="btn btn-text" onClick={onClose}>Avbryt</button>
+                            <button className="btn btn-primary" onClick={handleSave}><Save size={16} /> Spara</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* Ikonväljare Modal */}
+            {showIconPicker && (
+                <div className="icon-picker-modal" onClick={() => setShowIconPicker(false)}>
+                    <div className="icon-picker-content" onClick={e => e.stopPropagation()}>
+                        <div className="icon-picker-header">
+                            <h3>Välj ikon</h3>
+                            <button className="icon-picker-close" onClick={() => setShowIconPicker(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="icon-picker-search">
+                            <input
+                                type="text"
+                                className="icon-search-input"
+                                placeholder="Sök ikoner eller kategorier..."
+                                value={iconSearch}
+                                onChange={(e) => setIconSearch(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="icon-picker-body">
+                            {Object.keys(filteredIcons).length === 0 ? (
+                                <div className="no-icons-found">
+                                    <p>Inga ikoner hittades</p>
+                                    <small>Prova att söka på en annan term</small>
+                                </div>
+                            ) : (
+                                Object.entries(filteredIcons).map(([category, icons]) => (
+                                    <div key={category} className="icon-category">
+                                        <h4 className="category-title">{category}</h4>
+                                        <div className="category-icons">
+                                            {icons.map(icon => (
+                                                <button
+                                                    key={icon}
+                                                    className={`icon-option ${formData.icon === icon ? 'selected' : ''}`}
+                                                    onClick={() => handleIconSelect(icon)}
+                                                    title={`Välj ${icon}`}
+                                                >
+                                                    {icon}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="icon-picker-footer">
+                            <button className="btn btn-text" onClick={() => setShowIconPicker(false)}>
+                                Avbryt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
