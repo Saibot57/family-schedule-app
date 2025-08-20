@@ -1,5 +1,6 @@
 import React from 'react';
 import ActivityBlock from './ActivityBlock';
+import { timeToMinutes } from '../utils/timeHelpers';
 import './DayColumn.css';
 
 const DayColumn = ({ 
@@ -23,12 +24,6 @@ const DayColumn = ({
     const durationB = timeToMinutes(b.endTime) - timeB;
     return durationB - durationA;
   });
-
-  // Konvertera tid till minuter
-  const timeToMinutes = (time) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
 
   // Kontrollera om två aktiviteter överlappar
   const isOverlapping = (activity1, activity2) => {
