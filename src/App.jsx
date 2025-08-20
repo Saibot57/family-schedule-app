@@ -3,9 +3,9 @@ import WeekView from './components/WeekView';
 import ActivityModal from './components/ActivityModal';
 import FamilySettingsModal from './components/FamilySettingsModal';
 import { useSchedule } from './hooks/useSchedule';
-import { 
-  Calendar, Plus, ChevronLeft, ChevronRight, CalendarDays, 
-  Home, Settings, Users, Download, Upload, Copy 
+import {
+  Calendar, Plus, ChevronLeft, ChevronRight, CalendarDays,
+  Home, Settings, Users, Download, Upload, Copy
 } from 'lucide-react';
 import { getWeekNumber, getWeekDateRange, formatWeekRange } from './utils/timeHelpers';
 import './App.css';
@@ -34,26 +34,26 @@ const App = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
-  
+
   // Veckohantering
   const today = new Date();
   const currentWeekNumber = getWeekNumber(today);
   const currentYear = today.getFullYear();
-  
+
   const [selectedWeek, setSelectedWeek] = useState(currentWeekNumber);
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  
+
   // Visa/dölj olika medlemstyper
   const [showAdults, setShowAdults] = useState(true);
   const [showChildren, setShowChildren] = useState(true);
-  
+
   // Beräkna om vi visar nuvarande vecka
   const isCurrentWeek = selectedWeek === currentWeekNumber && selectedYear === currentYear;
-  
+
   // Hämta datumintervall för vald vecka
   const weekDateRange = getWeekDateRange(selectedWeek, selectedYear);
   const weekRangeText = formatWeekRange(weekDateRange.start, weekDateRange.end);
-  
+
   // Hämta statistik för veckan
   const weekStats = getStatistics(selectedWeek, selectedYear);
 
@@ -64,34 +64,40 @@ const App = () => {
   };
 
   // Hantera sparande av aktivitet
-// Hitta och ersätt denna funktion i src/App.jsx
-const handleSaveActivity = (activityData) => {
-  // Om vi redigerar en aktivitet, uppdatera den bara.
-  if (editingActivity && !editingActivity.isNew) {
-      // För redigering, slå ihop dagarna till den första valda dagen
-      const activityToUpdate = {
-          ...activityData,
-          day: activityData.days[0], // Spara bara den första dagen vid uppdatering
-      };
-      delete activityToUpdate.days; // Ta bort arrayen
-      updateActivity(editingActivity.id, activityToUpdate);
-  } else {
-      // Skapa en ny aktivitet för VARJE vald dag.
-      activityData.days.forEach(day => {
-          const newActivity = {
-              ...activityData,
-              day: day, // Sätt den specifika dagen för denna instans
-              week: selectedWeek,
-              year: selectedYear,
-          };
-          delete newActivity.days; // Ta bort arrayen från det enskilda objektet
-          addActivity(newActivity);
-      });
-  }
+  const handleSaveActivity = (activityData) => {
+    // Säkerställ att 'days' är en array för att undvika krascher.
+    const daysToCreate = Array.isArray(activityData.days) ? activityData.days : [];
 
-  setModalOpen(false);
-  setEditingActivity(null);
-};
+    // Ta bort temporära fält från objektet som ska sparas.
+    const { days, ...restOfActivityData } = activityData;
+
+    if (editingActivity && !editingActivity.isNew) {
+        // VID REDIGERING: Uppdatera endast en aktivitet.
+        // Använd den första dagen från listan som den nya dagen.
+        const updatedActivity = {
+            ...restOfActivityData,
+            day: daysToCreate[0] || editingActivity.day, // Fallback till originaldagen
+        };
+        updateActivity(editingActivity.id, updatedActivity);
+
+    } else {
+        // VID NYSKAPANDE: Skapa en separat aktivitet för varje vald dag.
+        daysToCreate.forEach(day => {
+            const newActivity = {
+                ...restOfActivityData,
+                day: day, // Sätt den specifika dagen för denna aktivitet
+                week: selectedWeek,
+                year: selectedYear,
+            };
+            addActivity(newActivity);
+        });
+    }
+
+    setModalOpen(false);
+    setEditingActivity(null);
+  };
+
+
   // Hantera borttagning av aktivitet
   const handleDeleteActivity = (id, deleteAll = false) => {
     deleteActivity(id, deleteAll);
@@ -103,10 +109,10 @@ const handleSaveActivity = (activityData) => {
   const navigateWeek = (direction) => {
     const newDate = new Date(selectedYear, 0, 1);
     newDate.setDate(newDate.getDate() + (selectedWeek - 1) * 7 + direction * 7);
-    
+
     const newWeek = getWeekNumber(newDate);
     const newYear = newDate.getFullYear();
-    
+
     setSelectedWeek(newWeek);
     setSelectedYear(newYear);
   };
@@ -123,7 +129,7 @@ const handleSaveActivity = (activityData) => {
       `Kopiera vecka ${selectedWeek} till vilken vecka? (1-52)`,
       String(selectedWeek + 1)
     );
-    
+
     if (targetWeek) {
       const weekNum = parseInt(targetWeek);
       if (weekNum >= 1 && weekNum <= 52) {
@@ -147,7 +153,7 @@ const handleSaveActivity = (activityData) => {
 
   // Visa veckoväljare
   const [showWeekPicker, setShowWeekPicker] = useState(false);
-  
+
   // Filtrera synliga medlemmar
   const visibleMembers = familyMembers.filter(member => {
     if (member.type === 'child') return showChildren;
@@ -170,7 +176,7 @@ const handleSaveActivity = (activityData) => {
                 </p>
               </div>
             </div>
-            
+
             <div className="header-actions">
               <button
                 onClick={() => handleOpenModal()}
@@ -179,7 +185,7 @@ const handleSaveActivity = (activityData) => {
                 <Plus size={20} />
                 Ny aktivitet
               </button>
-              
+
               <button
                 onClick={() => setSettingsOpen(true)}
                 className="btn btn-secondary"
@@ -196,15 +202,15 @@ const handleSaveActivity = (activityData) => {
               {visibleMembers.map(member => (
                 <div key={member.id} className="family-member-indicator">
                   <span className="member-icon">{member.icon}</span>
-                  <span 
-                    className="member-dot" 
+                  <span
+                    className="member-dot"
                     style={{ backgroundColor: member.color }}
                   />
                   <span className="member-name">{member.name}</span>
                 </div>
               ))}
             </div>
-            
+
             <div className="view-toggles">
               <label className="toggle-label">
                 <input
@@ -228,7 +234,7 @@ const handleSaveActivity = (activityData) => {
           {/* Veckonavigering */}
           <div className="week-navigation">
             <div className="week-nav-group">
-              <button 
+              <button
                 onClick={() => navigateWeek(-1)}
                 className="btn btn-icon"
                 aria-label="Föregående vecka"
@@ -236,8 +242,8 @@ const handleSaveActivity = (activityData) => {
               >
                 <ChevronLeft size={20} />
               </button>
-              
-              <button 
+
+              <button
                 onClick={goToCurrentWeek}
                 className={`btn ${isCurrentWeek ? 'btn-primary' : 'btn-secondary'}`}
                 disabled={isCurrentWeek}
@@ -246,8 +252,8 @@ const handleSaveActivity = (activityData) => {
                 <Home size={16} />
                 Denna vecka
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => navigateWeek(1)}
                 className="btn btn-icon"
                 aria-label="Nästa vecka"
@@ -266,7 +272,7 @@ const handleSaveActivity = (activityData) => {
                 <CalendarDays size={16} />
                 Välj vecka
               </button>
-              
+
               <button
                 onClick={handleCopyWeek}
                 className="btn btn-secondary"
@@ -274,7 +280,7 @@ const handleSaveActivity = (activityData) => {
               >
                 <Copy size={16} />
               </button>
-              
+
               <button
                 onClick={() => exportSchedule(selectedWeek, selectedYear)}
                 className="btn btn-secondary"
@@ -282,7 +288,7 @@ const handleSaveActivity = (activityData) => {
               >
                 <Download size={16} />
               </button>
-              
+
               <label className="btn btn-secondary" title="Importera schema">
                 <Upload size={16} />
                 <input
@@ -300,8 +306,8 @@ const handleSaveActivity = (activityData) => {
             <div className="week-picker">
               <div className="week-picker-header">
                 <label>År:</label>
-                <select 
-                  value={selectedYear} 
+                <select
+                  value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
                 >
                   {[...Array(5)].map((_, i) => {
@@ -315,7 +321,7 @@ const handleSaveActivity = (activityData) => {
                   const weekNum = i + 1;
                   const isSelected = weekNum === selectedWeek && selectedYear === selectedYear;
                   const isCurrent = weekNum === currentWeekNumber && selectedYear === currentYear;
-                  
+
                   return (
                     <button
                       key={weekNum}
@@ -376,9 +382,6 @@ const handleSaveActivity = (activityData) => {
             isOpen={modalOpen}
             activity={editingActivity}
             familyMembers={familyMembers}
-            activityTypes={activityTypes}
-            currentWeek={selectedWeek}
-            currentYear={selectedYear}
             onSave={handleSaveActivity}
             onDelete={handleDeleteActivity}
             onClose={() => {

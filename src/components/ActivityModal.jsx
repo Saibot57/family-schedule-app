@@ -51,26 +51,27 @@ const ActivityModal = ({
         let initialData;
         if (activity) {
             if (activity.isNew) {
-                // Klick i schemat - välj den dagen
+                // Ny aktivitet från klick i schemat
                 initialData = {
                     ...getInitialFormData(),
-                    days: [activity.day],
+                    days: [activity.day], // Välj den klickade dagen
                     startTime: activity.startTime,
                     endTime: activity.endTime,
                 };
             } else {
-                // Redigera existerande aktivitet
+                // Redigera en existerande aktivitet
                 initialData = {
                     ...getInitialFormData(),
                     ...activity,
-                    days: [activity.day], // Redigering hanterar bara en dag
+                    days: [activity.day], // Läs in den existerande dagens aktivitet korrekt
                     participants: activity.participants || [],
                 };
             }
         } else {
-            // Ny aktivitet från knappen
+            // Helt ny aktivitet från "Ny aktivitet"-knappen
             initialData = getInitialFormData();
         }
+        
         setFormData(initialData);
         setErrors({});
         setShowDeleteConfirm(false);
