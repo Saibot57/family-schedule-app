@@ -1,0 +1,212 @@
+/* Veckovisning container */
+.week-view {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Veckorutnät */
+.week-grid {
+  display: flex;
+  min-width: 800px; /* Minimum bredd för att undvika för mycket komprimering */
+}
+
+/* Tidskolumn */
+.time-column {
+  flex: 0 0 60px;
+  background-color: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: white;
+}
+
+.time-header {
+  height: 60px;
+  padding: 1rem 0.5rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.time-slots {
+  position: relative;
+}
+
+.time-slot {
+  height: 60px;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  position: relative;
+}
+
+.time-label {
+  font-size: 0.6875rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Dagcontainer */
+.days-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.days-header {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 60px;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.day-header {
+  padding: 1rem;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.day-header:last-child {
+  border-right: none;
+}
+
+.day-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.day-date {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.125rem;
+}
+
+/* Daginnehåll */
+.days-content {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+}
+
+/* Dagens markering */
+.day-header.today {
+  background: linear-gradient(180deg, #dbeafe 0%, #f9fafb 100%);
+  position: relative;
+}
+
+.day-date.today-date {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.today-badge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: #3b82f6;
+  color: white;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Nuvarande tid indikator */
+.current-time-indicator {
+  position: absolute;
+  left: 60px; /* Efter tidskolumnen */
+  right: 0;
+  height: 2px;
+  background-color: #ef4444;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.time-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  margin-left: -4px;
+  box-shadow: 0 0 0 2px white;
+}
+
+.time-line {
+  flex: 1;
+  height: 2px;
+  background-color: #ef4444;
+  opacity: 0.5;
+}
+
+/* Responsiv design */
+@media (max-width: 1024px) {
+  .week-grid {
+    min-width: 700px;
+  }
+  
+  .time-column {
+    flex: 0 0 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .week-view {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .week-grid {
+    min-width: 600px;
+  }
+  
+  .day-header {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .day-name {
+    font-size: 0.8125rem;
+  }
+  
+  .time-column {
+    flex: 0 0 45px;
+  }
+  
+  .time-label {
+    font-size: 0.625rem;
+  }
+}
+
+/* Scrollbar styling */
+.week-view::-webkit-scrollbar {
+  height: 8px;
+}
+
+.week-view::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.week-view::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+.week-view::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

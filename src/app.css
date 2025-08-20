@@ -1,0 +1,325 @@
+/* Reset och grundläggande stilar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+/* App container */
+.app {
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.app-header {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-title h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.header-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #3b82f6;
+}
+
+.week-number {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Knappar */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-text {
+  background-color: transparent;
+  color: #6b7280;
+  padding: 0.5rem 1rem;
+}
+
+.btn-text:hover {
+  background-color: #f3f4f6;
+  box-shadow: none;
+}
+
+.btn-icon {
+  padding: 0.5rem;
+  background-color: #f3f4f6;
+  color: #374151;
+  border-radius: 6px;
+}
+
+.btn-icon:hover {
+  background-color: #e5e7eb;
+}
+
+/* Barnöversikt */
+.children-legend {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  margin: 1rem 0;
+}
+
+.child-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.child-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.child-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Veckonavigering */
+.week-navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: space-between;
+}
+
+.week-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.week-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Veckoväljare */
+.week-picker {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.week-picker-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.week-picker-header label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.week-picker-header select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.875rem;
+}
+
+.week-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 0.5rem;
+}
+
+.week-picker-btn {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.week-picker-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.week-picker-btn.selected {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.week-picker-btn.current {
+  border-color: #10b981;
+  background: #ecfdf5;
+  font-weight: 600;
+}
+
+/* Veckonotis */
+.week-notice {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.week-distance {
+  color: #78350f;
+  font-size: 0.8125rem;
+}
+
+/* Main content */
+.app-main {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+/* Responsiv design */
+@media (max-width: 768px) {
+  .app {
+    padding: 0.5rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .header-title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .children-legend {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .week-navigation {
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+}

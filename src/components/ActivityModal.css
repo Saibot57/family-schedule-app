@@ -1,0 +1,558 @@
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal content */
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-week-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Modal body */
+.modal-body {
+  padding: 1.5rem;
+}
+
+/* Form groups */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-group label svg {
+  width: 16px;
+  height: 16px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #ef4444;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Form row */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Required asterisk */
+.required {
+  color: #ef4444;
+}
+
+/* Error message */
+.error-message {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Form options */
+.form-options {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Deltagare sektion */
+.participants-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quick-select {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.quick-btn {
+  padding: 0.375rem 0.75rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.members-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.member-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member-category h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.member-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.member-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.member-checkbox:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.member-checkbox input[type="checkbox"] {
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.member-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.member-dot-small {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Aktivitetstyp grid */
+.activity-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
+}
+
+.type-select-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-select-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.type-select-btn.selected {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.type-select-btn .type-icon {
+  font-size: 1.25rem;
+}
+
+.type-select-btn .type-name {
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Återkommande alternativ */
+.recurring-options {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.recurring-options label {
+  font-size: 0.8125rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.weeks-input {
+  width: 60px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.help-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.warning-option {
+  background: #fef3c7;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #fbbf24;
+}
+
+.warning-option span {
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* Inline checkbox */
+.inline-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0.5rem;
+}
+
+.inline-checkbox input {
+  margin: 0;
+}
+
+/* Reminder select */
+.reminder-select {
+  width: auto;
+  margin-left: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+}
+
+/* Modal footer */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 0 0 12px 12px;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Delete confirmation */
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+}
+
+.delete-confirm span {
+  color: #991b1b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn-danger-confirm {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-danger-confirm:hover {
+  background-color: #b91c1c;
+}
+
+/* Responsiv design */
+@media (max-width: 640px) {
+  .modal-content {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .footer-left,
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+    
+    /* --- CSS för nya funktioner i ActivityModal --- */
+
+/* Deltagar-piller och sökfält */
+.participant-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: #e5e7eb;
+  padding: 0.25rem 0.625rem;
+  border-radius: 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.pill .member-dot-small {
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.pill button {
+  background: #d1d5db;
+  color: #4b5563;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 0.25rem;
+  transition: all 0.2s;
+}
+
+.pill button:hover {
+  background: #9ca3af;
+  color: white;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.participant-search-input {
+  width: 100%;
+  padding-left: 2.5rem !important; /* Åsidosätt tidigare stil */
+}
+
+.participant-dropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  list-style: none;
+  margin-top: 0.25rem;
+  padding: 0;
+  z-index: 1010;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.participant-dropdown li {
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.participant-dropdown li:hover {
+  background-color: #f3f4f6;
+}
+
+
+/* Hopfällbar aktivitetstyp */
+.expandable-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.expandable-header label {
+  margin-bottom: 0; /* Ta bort marginal från label inuti knappen */
+  pointer-events: none; /* Låt klick gå till knappen */
+}
+
+.chevron-icon {
+  transition: transform 0.2s ease-in-out;
+  color: #6b7280;
+}
+
+.chevron-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.activity-type-grid {
+  animation: fadeIn 0.3s ease;
+  margin-top: 0.75rem;
+}
+
+/* Anpassning för datumväljare i återkommande sektion */
+.recurring-options {
+  align-items: center;
+}
+
+.recurring-options .weeks-input { /* Återanvänder klassen men stylar för datum */
+  width: auto;
+  flex-grow: 1;
+}
+  }
+}
