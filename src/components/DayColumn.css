@@ -1,0 +1,68 @@
+/* Stilar för en enskild dag-kolumn */
+.day-column {
+    position: relative; /* VIKTIGT: Detta gör kolumnen till "ankare" för aktiviteterna */
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .day-column:last-child {
+    border-right: none;
+  }
+  
+  /* Markering för dagens datum */
+  .day-column.today-column {
+    background-color: #f9fafb;
+  }
+  
+  /* Bakgrundsrutnät för timmar */
+  .day-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .hour-slot {
+    flex: 1;
+    border-bottom: 1px dashed #e5e7eb;
+    position: relative;
+  }
+  
+  .hour-slot:last-child {
+    border-bottom: none;
+  }
+  
+  .half-hour-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #f3f4f6;
+  }
+  
+  /* Container för själva aktiviteterna */
+  .activities-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  
+  /* Klickbar yta för att skapa ny aktivitet */
+  .add-activity-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      cursor: cell;
+  }
+  
+  .add-activity-overlay:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+  }

@@ -64,22 +64,34 @@ const App = () => {
   };
 
   // Hantera sparande av aktivitet
-  const handleSaveActivity = (activityData) => {
-    const activityWithWeek = {
-      ...activityData,
-      week: activityData.recurring ? null : selectedWeek,
-      year: activityData.recurring ? null : selectedYear
-    };
-    
-    if (editingActivity) {
-      updateActivity(editingActivity.id, activityWithWeek);
-    } else {
-      addActivity(activityWithWeek);
-    }
-    setModalOpen(false);
-    setEditingActivity(null);
-  };
+// Hitta och ersätt denna funktion i src/App.jsx
+const handleSaveActivity = (activityData) => {
+  // Om vi redigerar en aktivitet, uppdatera den bara.
+  if (editingActivity && !editingActivity.isNew) {
+      // För redigering, slå ihop dagarna till den första valda dagen
+      const activityToUpdate = {
+          ...activityData,
+          day: activityData.days[0], // Spara bara den första dagen vid uppdatering
+      };
+      delete activityToUpdate.days; // Ta bort arrayen
+      updateActivity(editingActivity.id, activityToUpdate);
+  } else {
+      // Skapa en ny aktivitet för VARJE vald dag.
+      activityData.days.forEach(day => {
+          const newActivity = {
+              ...activityData,
+              day: day, // Sätt den specifika dagen för denna instans
+              week: selectedWeek,
+              year: selectedYear,
+          };
+          delete newActivity.days; // Ta bort arrayen från det enskilda objektet
+          addActivity(newActivity);
+      });
+  }
 
+  setModalOpen(false);
+  setEditingActivity(null);
+};
   // Hantera borttagning av aktivitet
   const handleDeleteActivity = (id, deleteAll = false) => {
     deleteActivity(id, deleteAll);

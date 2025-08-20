@@ -554,5 +554,102 @@
   width: auto;
   flex-grow: 1;
 }
+/* --- CSS för nya funktioner i ActivityModal (flera dagar, anpassat namn) --- */
+
+/* Dagväljare */
+.day-selector {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.day-btn {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.day-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.day-btn.selected {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Anpassad aktivitet input */
+.custom-activity-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.custom-activity-input input {
+  flex-grow: 1;
+}
+
+.icon-picker-wrapper {
+  position: relative;
+}
+
+.icon-picker-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 1.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-picker-dropdown {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1020;
+  width: 200px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.icon-picker-wrapper:hover .icon-picker-dropdown {
+  opacity: 1;
+  visibility: visible;
+  display: grid; /* Behövs för att hover ska fungera */
+}
+
+.icon-picker-dropdown button {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.icon-picker-dropdown button:hover {
+    background-color: #f3f4f6;
+}
   }
 }

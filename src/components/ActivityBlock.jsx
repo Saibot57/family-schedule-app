@@ -26,10 +26,9 @@ const ActivityBlock = ({
   ).filter(Boolean) || [];
   
   // Hämta aktivitetstyp
-  const activityType = activityTypes?.find(t => t.id === activity.type) || {
-    name: activity.type,
-    icon: '📌',
-    color: '#94a3b8'
+  const activityType = {
+    name: activity.name || 'Aktivitet', // Använd det nya namnfältet
+    icon: activity.icon || '📌',       // Använd den nya ikonen
   };
   
   // Formatera tid för visning
@@ -61,7 +60,7 @@ const ActivityBlock = ({
       };
     } else {
       // Fler än 2 deltagare - använd aktivitetens färg med deltagarprickar
-      return { backgroundColor: activityType.color };
+      return { backgroundColor: '#64748b' };
     }
   };
   
