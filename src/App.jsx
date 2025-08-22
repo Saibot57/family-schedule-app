@@ -63,34 +63,26 @@ const App = () => {
     setModalOpen(true);
   };
 
-  // Hantera sparande av aktivitet
+  // Hantera sparande av aktivitet (UPPDATERAD LOGIK)
   const handleSaveActivity = (activityData) => {
-    // Säkerställ att 'days' är en array för att undvika krascher.
-    const daysToCreate = Array.isArray(activityData.days) ? activityData.days : [];
-
-    // Ta bort temporära fält från objektet som ska sparas.
-    const { days, ...restOfActivityData } = activityData;
-
     if (editingActivity && !editingActivity.isNew) {
-        // VID REDIGERING: Uppdatera endast en aktivitet.
-        // Använd den första dagen från listan som den nya dagen.
-        const updatedActivity = {
-            ...restOfActivityData,
-            day: daysToCreate[0] || editingActivity.day, // Fallback till originaldagen
-        };
-        updateActivity(editingActivity.id, updatedActivity);
-
+      // VID REDIGERING: Uppdatera befintlig aktivitet.
+      // `days` arrayen innehåller bara en dag vid redigering.
+      const updatedActivity = {
+        ...activityData,
+        day: activityData.days[0] || editingActivity.day,
+      };
+      // Ta bort 'days' för att undvika redundant data.
+      delete updatedActivity.days;
+      updateActivity(editingActivity.id, updatedActivity);
     } else {
-        // VID NYSKAPANDE: Skapa en separat aktivitet för varje vald dag.
-        daysToCreate.forEach(day => {
-            const newActivity = {
-                ...restOfActivityData,
-                day: day, // Sätt den specifika dagen för denna aktivitet
-                week: selectedWeek,
-                year: selectedYear,
-            };
-            addActivity(newActivity);
-        });
+      // VID NYSKAPANDE: Skicka hela objektet till useSchedule.
+      // Hooken hanterar logiken för både återkommande och vanliga aktiviteter.
+      addActivity({
+        ...activityData,
+        week: selectedWeek,
+        year: selectedYear,
+      });
     }
 
     setModalOpen(false);

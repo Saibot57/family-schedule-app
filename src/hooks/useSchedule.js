@@ -91,85 +91,82 @@ export const useSchedule = () => {
   // Hjälpfunktion för att beräkna veckor mellan datum
   const getWeeksBetweenDates = (startDate, endDate) => {
     const weeks = [];
-    const current = new Date(startDate);
+    let current = new Date(startDate);
+    // Säkerställ att startdatumets tid är nollställd för att undvika problem med tidszoner
+    current.setHours(0, 0, 0, 0);
     const end = new Date(endDate);
     
+    // Inkludera startveckan
+    const startWeek = getWeekNumber(current);
+    const startYear = current.getFullYear();
+    weeks.push({ week: startWeek, year: startYear });
+    
+    // Gå framåt 7 dagar i taget
+    current.setDate(current.getDate() + 7);
+
     while (current <= end) {
-      const weekNumber = getWeekNumber(current);
-      const year = current.getFullYear();
-      weeks.push({ week: weekNumber, year });
-      current.setDate(current.getDate() + 7);
+        const weekNumber = getWeekNumber(current);
+        const year = current.getFullYear();
+        // Undvik att lägga till samma vecka/år-par igen
+        if (!weeks.some(w => w.week === weekNumber && w.year === year)) {
+            weeks.push({ week: weekNumber, year });
+        }
+        current.setDate(current.getDate() + 7);
     }
     
     return weeks;
   };
 
-  // Lägg till aktivitet
+  // Lägg till aktivitet (UPPDATERAD LOGIK)
   const addActivity = useCallback((activityData) => {
-    const currentDate = new Date();
-    const currentWeekNumber = getWeekNumber(currentDate);
-    const currentYear = currentDate.getFullYear();
+    const newActivities = [];
+    const baseActivity = { ...activityData };
+    
+    // Ta bort temporära fält som inte ska sparas på varje enskild aktivitet
+    delete baseActivity.days;
+    delete baseActivity.recurringEndDate;
+    delete baseActivity.updateAllRecurring;
 
     // Om det är en återkommande aktivitet
     if (activityData.recurring && activityData.recurringEndDate) {
-      const activities = [];
+      const startDate = new Date(); // Startar från idag
       const endDate = new Date(activityData.recurringEndDate);
-      const weeks = getWeeksBetweenDates(currentDate, endDate);
+      const weeks = getWeeksBetweenDates(startDate, endDate);
       const recurringGroupId = `recurring-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      console.log('Skapar återkommande aktiviteter för:', weeks.length, 'veckor');
-      
-      // Skapa en aktivitet för varje dag i varje vecka
       weeks.forEach(({ week, year }) => {
         activityData.days.forEach(day => {
           const newActivity = {
-            ...activityData,
+            ...baseActivity,
             id: `activity-${Date.now()}-${week}-${day}-${Math.random().toString(36).substr(2, 9)}`,
             day: day,
             week: week,
             year: year,
             recurringGroupId: recurringGroupId,
             createdAt: new Date().toISOString(),
-            recurring: true // Markera som återkommande
           };
-          
-          // Ta bort temporära fält
-          delete newActivity.days;
-          delete newActivity.recurringEndDate;
-          delete newActivity.updateAllRecurring;
-          
-          activities.push(newActivity);
+          newActivities.push(newActivity);
         });
       });
-      
-      console.log('Skapade', activities.length, 'återkommande aktiviteter');
-      setActivities(prev => [...prev, ...activities]);
-      return activities;
+
     } else {
-      // Vanlig aktivitet eller enstaka aktivitet
-      const activities = [];
-      
+      // Annars, skapa aktiviteter för varje vald dag i den aktuella veckan
       activityData.days.forEach(day => {
         const newActivity = {
-          ...activityData,
+          ...baseActivity,
           id: `activity-${Date.now()}-${day}-${Math.random().toString(36).substr(2, 9)}`,
           day: day,
-          week: activityData.week || currentWeekNumber,
-          year: activityData.year || currentYear,
+          // week och year kommer från App.jsx
+          week: activityData.week,
+          year: activityData.year,
           createdAt: new Date().toISOString()
         };
-        
-        // Ta bort temporära fält
-        delete newActivity.days;
-        delete newActivity.recurringEndDate;
-        delete newActivity.updateAllRecurring;
-        
-        activities.push(newActivity);
+        newActivities.push(newActivity);
       });
-      
-      setActivities(prev => [...prev, ...activities]);
-      return activities;
     }
+    
+    setActivities(prev => [...prev, ...newActivities]);
+    return newActivities;
   }, []);
 
   // Uppdatera aktivitet
@@ -177,19 +174,28 @@ export const useSchedule = () => {
     setActivities(prev => {
       const activity = prev.find(a => a.id === id);
       
+      // Ta bort temporära fält från updates-objektet
+      const cleanUpdates = { ...updates };
+      delete cleanUpdates.updateAllRecurring;
+
       if (activity?.recurringGroupId && updates.updateAllRecurring) {
         // Uppdatera alla i gruppen
         console.log('Uppdaterar alla aktiviteter i återkommande grupp:', activity.recurringGroupId);
         return prev.map(a => 
           a.recurringGroupId === activity.recurringGroupId
-            ? { ...a, ...updates, id: a.id, week: a.week, year: a.year, day: a.day, recurringGroupId: a.recurringGroupId }
+            ? { ...a, ...cleanUpdates, id: a.id, week: a.week, year: a.year, day: a.day, recurringGroupId: a.recurringGroupId }
             : a
         );
       } else {
         // Uppdatera bara denna
+        // Om detta var en återkommande aktivitet men nu redigeras enskilt, ta bort kopplingen
+        const finalUpdates = activity?.recurringGroupId 
+            ? { ...cleanUpdates, recurringGroupId: null } 
+            : cleanUpdates;
+
         return prev.map(a => 
           a.id === id 
-            ? { ...a, ...updates }
+            ? { ...a, ...finalUpdates }
             : a
         );
       }
